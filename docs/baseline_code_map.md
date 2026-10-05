@@ -53,7 +53,7 @@ in the frozen source snapshot.
 - `scripts/run_stage3_multilayer_pilot.py`: sequential capture of chosen layers using the frozen 256-token prompt. Default layers are only 0 and 31; the reproduction CLI supplies all five explicitly.
 - `scripts/run_stage4_baselines_smoke.py`: both small and full representative benchmark. Its defaults are not the full paper selection. The new runner invokes the same `run_baseline_case` API for all 330 cases and eight method/mode combinations.
 - `scripts/run_stage5_quality_smoke.py`: full execution, historical layer-0 packaging, reporting repair, or finalize-only depending on flags. The new full path supplies exactly two prompts and four methods.
-- `paper/rack_kv_rsi_isef/scripts/`: evidence extraction and publication figures. These are presentation/reporting tools, not authoritative scientific implementations.
+- `paper/rack_kv_paper/`: evidence extraction and publication figures. These are presentation/reporting tools, not authoritative scientific implementations.
 - `rack_kv_review/` and `zip_check/`: older duplicated source trees for archive inspection. They are not imported by the reproduction CLI and must not shadow `rack_kv/`.
 - `.tmp/*/review_package/`: historical snapshots, not active code. `.tmp/stage5_quality_validation_layer0*` contains local safety/diagnostic runs; pseudo-logits must not be merged into full-model results.
 - `.tmp/stage5_profile_probe`, short/memory validation directories: profiling or safety variants, not the primary paper population.
