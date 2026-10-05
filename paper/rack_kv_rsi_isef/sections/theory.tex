@@ -1,0 +1,288 @@
+\section{Theoretical Analysis}
+
+\subsection{Attention Decomposition}
+
+Fix one layer, one KV head, one mapped query head, and one query step. Let the original visible cache be
+\begin{equation}
+  C = \{(k_i,v_i)\}_{i=1}^{T}.
+\end{equation}
+RACK-KV partitions this cache into an exact recent window \(C_{\recent}\) and historical blocks \(B_1,\dots,B_M\). After block-local reconstruction, the compressed cache becomes
+\begin{equation}
+  \hat{C} = \{(\hat{k}_i,\hat{v}_i)\}_{i=1}^{T}.
+\end{equation}
+For a query vector \(q\), there are then three distinct attention outputs:
+\begin{align}
+  o_{\exact}
+  &=
+  \sum_{i=1}^{T} \alpha_i v_i,
+  \\
+  \hat{o}_{\full}
+  &=
+  \sum_{i=1}^{T} \hat{\alpha}_i \hat{v}_i,
+  \\
+  \hat{o}_{\kept}
+  &=
+  \sum_{i \in K} \tilde{\alpha}_i \hat{v}_i.
+\end{align}
+Here \(o_{\exact}\) uses the original cache, \(\hat{o}_{\full}\) uses the fully reconstructed cache, and \(\hat{o}_{\kept}\) uses the reconstructed cache after certified skipping removes a set \(S\) of historical contributions, leaving \(K\) as the kept set. This separation is essential because compression and skipping are scientifically different perturbations. Compression changes the underlying vectors. Certified skipping removes a subset of already reconstructed contributions.
+
+The local design goal can therefore be stated as follows: compress the historical cache enough to reduce storage, keep every block independently decodable, and skip only those reconstructed blocks whose omission can be certified not to change the local reconstructed attention output by more than a chosen tolerance. The theorem below addresses only the last clause.
+
+\subsection{Blockwise Logit Upper Bound}
+
+\begin{figure}[t]
+  \centering
+  \input{figures/fig_certificate_geometry.tex}
+  \caption{Geometric intuition for the certification bound. A representative anchor \(a_m\) and radius \(\rho_m\) define a norm ball containing the reconstructed keys of block \(m\). The query vector \(q\) induces an upper bound on every possible query-key score in that block, and therefore on its unnormalized softmax mass.}
+  \label{fig:geometry}
+\end{figure}
+
+Consider one historical block \(m\) with representative vector \(a_m\). Assume that every reconstructed key in the block satisfies
+\begin{equation}
+  \norm{\hat{k}_{m,t} - a_m} \le \rho_m.
+\end{equation}
+Then for any reconstructed key in the block,
+\begin{align}
+  q^\T \hat{k}_{m,t}
+  &=
+  q^\T a_m + q^\T(\hat{k}_{m,t}-a_m)
+  \\
+  &\le
+  q^\T a_m + \norm{q}\,\norm{\hat{k}_{m,t}-a_m}
+  \\
+  &\le
+  q^\T a_m + \norm{q}\rho_m.
+\end{align}
+This is a standard Cauchy--Schwarz argument, but its role is central: it converts a compact geometric summary into a conservative upper bound on every logit that block \(m\) could produce. The argument is safe precisely because it ignores direction. Any directional structure inside the block can only make the bound looser, not unsafe.
+
+\subsection{Skipped-Mass Bound}
+
+Let \(n_m\) denote the number of entries in block \(m\), and define the attention logits
+\begin{equation}
+  s_i = \frac{q^\T \hat{k}_i}{\sqrt{d}}.
+\end{equation}
+The previous subsection implies the per-block mass bound
+\begin{equation}
+  U_m
+  =
+  n_m \expf\!\left(
+    \frac{q^\T a_m + \norm{q}\rho_m}{\sqrt{d}}
+  \right).
+\end{equation}
+The factor \(n_m\) appears because the block contains \(n_m\) entries, each of which could, in the worst case, attain the same maximal logit allowed by the geometric summary. The exponential arises from the softmax numerator, and the \(\sqrt{d}\) term is the usual attention scaling.
+
+If \(S\) is a set of skipped blocks, then
+\begin{equation}
+  U_S = \sum_{m \in S} U_m
+\end{equation}
+is a valid upper bound on the total omitted unnormalized softmax mass. Similarly, if \(\nu_m\) bounds the norm of every reconstructed value in block \(m\), then
+\begin{equation}
+  \nu_S = \max_{m \in S} \nu_m
+\end{equation}
+controls the size of any single omitted value vector, and
+\begin{equation}
+  W_S = \sum_{m \in S} U_m \nu_m
+\end{equation}
+gives a more value-aware but still conservative aggregate quantity. These constructions are mathematically straightforward, but they already expose one source of conservativeness: summing blockwise upper bounds ignores cancellation across blocks and across entries within a block.
+
+\subsection{Certified Output-Error Theorem}
+
+Let \(K\) denote the kept reconstructed entries and \(S\) the skipped reconstructed entries. Define
+\begin{align}
+  Z_K &= \sum_{i \in K} \expf(s_i),
+  &
+  Z_S &= \sum_{i \in S} \expf(s_i),
+  \\
+  N_K &= \sum_{i \in K} \expf(s_i)\hat{v}_i,
+  &
+  N_S &= \sum_{i \in S} \expf(s_i)\hat{v}_i,
+\end{align}
+and
+\begin{equation}
+  \hat{o}_{\kept} = \frac{N_K}{Z_K},
+  \qquad
+  \hat{o}_{\full} = \frac{N_K + N_S}{Z_K + Z_S}.
+\end{equation}
+
+\begin{theorem}[Certified local output-error bound]
+  \label{thm:local}
+  Assume that for the skipped set \(S\),
+  \begin{align}
+    Z_S &\le U_S,
+    \\
+    Z_K &\ge L_K > 0,
+    \\
+    \norm{\hat{v}_i} &\le \nu_S
+    \qquad \forall i \in S,
+    \\
+    \norm{\hat{o}_{\kept}} &\le B_K.
+  \end{align}
+  Then
+  \begin{equation}
+    \norm{\hat{o}_{\full} - \hat{o}_{\kept}}
+    \le
+    \frac{U_S}{L_K + U_S}\,(\nu_S + B_K).
+  \end{equation}
+  A second conservative form is
+  \begin{equation}
+    \norm{\hat{o}_{\full} - \hat{o}_{\kept}}
+    \le
+    \frac{W_S + U_S B_K}{L_K}.
+  \end{equation}
+\end{theorem}
+
+The theorem is local in a precise sense. It concerns one attention head, one query step, and the reconstructed compressed cache. It does not compare directly with the original full-precision cache, nor does it yet say anything about downstream residual, multilayer, or language-model behavior.
+
+\subsection{Proof and Interpretation}
+
+\begin{proposition}[Exact decomposition identity]
+  \label{prop:identity}
+  For the kept and skipped partition above,
+  \begin{equation}
+    \hat{o}_{\full} - \hat{o}_{\kept}
+    =
+    \frac{N_S - Z_S \hat{o}_{\kept}}{Z_K + Z_S}.
+  \end{equation}
+\end{proposition}
+
+\begin{proof}
+  Starting from the definitions,
+  \begin{align}
+    \hat{o}_{\full} - \hat{o}_{\kept}
+    &=
+    \frac{N_K + N_S}{Z_K + Z_S}
+    -
+    \frac{N_K}{Z_K}.
+  \end{align}
+  Multiply both terms by the common denominator \(Z_K(Z_K+Z_S)\):
+  \begin{align}
+    \hat{o}_{\full} - \hat{o}_{\kept}
+    &=
+    \frac{Z_K(N_K + N_S) - (Z_K + Z_S)N_K}{Z_K(Z_K + Z_S)}
+    \\
+    &=
+    \frac{Z_KN_S - Z_SN_K}{Z_K(Z_K + Z_S)}.
+  \end{align}
+  Since \(N_K = Z_K \hat{o}_{\kept}\),
+  \begin{equation}
+    \hat{o}_{\full} - \hat{o}_{\kept}
+    =
+    \frac{Z_KN_S - Z_SZ_K\hat{o}_{\kept}}{Z_K(Z_K + Z_S)}
+    =
+    \frac{N_S - Z_S\hat{o}_{\kept}}{Z_K + Z_S}.
+  \end{equation}
+\end{proof}
+
+\begin{proof}[Proof of \Cref{thm:local}]
+  By \Cref{prop:identity},
+  \begin{equation}
+    \norm{\hat{o}_{\full} - \hat{o}_{\kept}}
+    =
+    \left\lVert
+      \frac{N_S - Z_S\hat{o}_{\kept}}{Z_K + Z_S}
+    \right\rVert
+    \le
+    \frac{\norm{N_S} + Z_S\norm{\hat{o}_{\kept}}}{Z_K + Z_S},
+  \end{equation}
+  where the triangle inequality is used in the numerator and the denominator is positive because \(Z_K>0\) and \(Z_S\ge0\).
+
+  It remains to bound \(\norm{N_S}\). Using the definition of \(N_S\),
+  \begin{align}
+    \norm{N_S}
+    &=
+    \left\lVert
+      \sum_{i \in S} \expf(s_i)\hat{v}_i
+    \right\rVert
+    \\
+    &\le
+    \sum_{i \in S} \expf(s_i)\norm{\hat{v}_i}
+    \\
+    &\le
+    \sum_{i \in S} \expf(s_i)\nu_S
+    =
+    Z_S \nu_S.
+  \end{align}
+  Substituting this estimate and \(\norm{\hat{o}_{\kept}}\le B_K\) gives
+  \begin{equation}
+    \norm{\hat{o}_{\full} - \hat{o}_{\kept}}
+    \le
+    \frac{Z_S(\nu_S + B_K)}{Z_K + Z_S}.
+  \end{equation}
+  The function \(f(z,u)=u(\nu_S+B_K)/(z+u)\) is increasing in \(u\) for \(u\ge0\) and decreasing in \(z\) for \(z>0\). Therefore the conservative substitutions \(Z_S\le U_S\) and \(Z_K\ge L_K\) yield
+  \begin{equation}
+    \norm{\hat{o}_{\full} - \hat{o}_{\kept}}
+    \le
+    \frac{U_S}{L_K + U_S}(\nu_S + B_K).
+  \end{equation}
+
+  For the alternative form, use the sharper value-aware estimate
+  \begin{equation}
+    \norm{N_S}
+    \le
+    \sum_{m \in S} U_m \nu_m
+    =
+    W_S.
+  \end{equation}
+  Combining this with \(\norm{\hat{o}_{\kept}}\le B_K\), \(Z_S\le U_S\), and \(Z_K+Z_S\ge Z_K\ge L_K\) gives
+  \begin{equation}
+    \norm{\hat{o}_{\full} - \hat{o}_{\kept}}
+    \le
+    \frac{W_S + U_S B_K}{L_K}.
+  \end{equation}
+\end{proof}
+
+Scientifically, the theorem says that four ingredients control local skipping error. The term \(U_S\) measures how much softmax mass the skipped set could possibly contribute. The term \(\nu_S\) controls the size of omitted values. The term \(B_K\) controls the size of the retained output that must be renormalized after skipping. The denominator \(L_K + U_S\) shows that skipping is safest when the omitted mass is tiny relative to the kept mass. The bound therefore becomes more permissive when the block geometry is tight, the kept mass is strong, and the requested tolerance is loose.
+
+\subsection{Compression and Skipping Error Decomposition}
+
+\begin{figure}[t]
+  \centering
+  \input{figures/fig_error_decomposition.tex}
+  \caption{Local error decomposition. Compression moves from original attention to attention over the fully reconstructed cache. Certified skipping then removes a subset of reconstructed contributions. The current theorem controls only the second step.}
+  \label{fig:decomp}
+\end{figure}
+
+The theorem above certifies only the effect of skipping relative to the reconstructed cache. The total local error satisfies
+\begin{equation}
+  \norm{o_{\exact} - \hat{o}_{\kept}}
+  \le
+  \norm{o_{\exact} - \hat{o}_{\full}}
+  +
+  \norm{\hat{o}_{\full} - \hat{o}_{\kept}}.
+\end{equation}
+The first term is compression error. It is caused by anchor selection, residual quantization, and the finite precision of the stored representation. The second term is skipping error. It is caused only by omitting reconstructed contributions after certification.
+
+This distinction matters both mathematically and experimentally. A small skipping bound does not imply that the codec itself is accurate, and a very accurate codec does not imply that aggressive skipping is safe. RACK-KV currently proves only the second term. The first is measured empirically through full reconstruction. Any future one-layer theorem that combines compression and skipping will have to control both sources simultaneously.
+
+\subsection{Storage and Computational Complexity}
+
+Let \(d_k\) and \(d_v\) be the key and value dimensions, let \(W\) be the exact recent-window size, let \(B\) be the historical block size, and let \(M\) be the number of historical blocks. Full KV storage for one head scales as
+\begin{equation}
+  O\!\bigl(T(d_k+d_v)\bigr).
+\end{equation}
+RACK-KV keeps the recent window exact, contributing
+\begin{equation}
+  O\!\bigl(W(d_k+d_v)\bigr),
+\end{equation}
+and stores the historical region as block-local anchors, quantized residuals, scales, and metadata. At the level of asymptotic structure, the historical storage becomes
+\begin{equation}
+  O\!\Bigl(
+    M(d_k+d_v)
+    +
+    (T-W)(d_k+d_v)
+    +
+    M
+  \Bigr),
+\end{equation}
+where the first term corresponds to anchors, the second to residual payloads, and the last to scales, indices, and block summaries. The asymptotic expression alone is not enough to predict actual savings because the constants are exactly the point: anchors and metadata cost bytes, while quantized residuals recover them.
+
+The same distinction appears on the computational side. Independent block access gives \(O(1)\) dependency depth per addressed block rather than \(O(M)\) sequential dependence. If every historical block is reconstructed and attended, however, the attention workload still scales with the number of retained entries. Logical skipping can reduce the effective number of reconstructed contributions seen by one query head, but it becomes true physical decode or bandwidth reduction only when the GQA-sharing constraint is resolved at the group level. The current work therefore establishes storage reduction and logical certification, not a proved end-to-end runtime improvement.
+
+\subsection{Conservativeness of the Certificate}
+\label{sec:conservative}
+
+The empirical skip rate is low, and the mathematics explains why. First, each block is summarized by a single norm ball. That bound is blind to direction, so a query that is nearly orthogonal to the dominant local variation still pays for the full radius \(\rho_m\). Second, the block mass bound assumes that every entry in the block could attain the worst allowed logit simultaneously, hence the multiplicative factor \(n_m\). Third, the aggregate skipped-mass bound sums blockwise worst cases, which removes any possibility of cancellation across blocks.
+
+Value information is treated conservatively as well. The theorem uses either a maximum skipped value norm \(\nu_S\) or the blockwise sum \(W_S\), both of which ignore fine-grained alignment between omitted values and the retained output. The lower bound \(L_K\) on retained mass can also be loose. Since the softmax denominator appears in the denominator of the theorem, a pessimistic kept-mass lower bound directly suppresses skipping. Exponential sensitivity compounds all of these effects: modest looseness in the logit bound can turn into substantial looseness after exponentiation.
+
+Grouped-query attention introduces a final layer of conservativeness at the systems level. A logical skip for one query head may have no physical effect if another mapped head still needs the same KV block. The present theorem is therefore best understood as a safe local decision rule, not as a tight predictor of practical decode avoidance. This interpretation is consistent with the experiments: the certificate appears safe on the evaluated cases, but it skips rarely. Tighter future alternatives may require richer geometry, value-aware summaries, hierarchical certification, or group-level GQA reasoning.

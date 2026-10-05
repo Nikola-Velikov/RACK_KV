@@ -1,0 +1,17 @@
+\begin{threeparttable}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}l c c c c c c@{}}
+\toprule
+Method & {\makecell{Mean\\NLL}} & {\makecell{$\Delta$NLL\\vs. Full}} & {\makecell{Perplexity}} & {\makecell{Top-1\\(\%)}} & {\makecell{Mean\\KL}} & {\makecell{Final-prefix\\saving (\%)}} \\
+\midrule
+Full KV & 3.395 & 0 & 29.83 & 100.0 & 0 & 0.0 \\
+RACK comp. & 3.393 & $-2.0 \times 10^{-3}$ & 29.77 & 98.4 & $1.99 \times 10^{-4}$ & 5.7 \\
+RACK cert. & 3.396 & $9.5 \times 10^{-4}$ & 29.86 & 99.0 & $1.95 \times 10^{-4}$ & 5.7 \\
+Uniform INT8 & 3.396 & $3.4 \times 10^{-4}$ & 29.84 & 97.9 & $2.06 \times 10^{-4}$ & 6.5 \\
+\bottomrule
+\end{tabular*}
+\begin{tablenotes}[flushleft]
+\item All non-reference methods retained the Full-KV top-1 token inside their own top-5 for every scored position. Whole-model savings are modest because only layers 0, 8, 16, 24, and 31 use the modified storage path in this first end-to-end benchmark.
+\end{tablenotes}
+\end{threeparttable}

@@ -1,0 +1,74 @@
+\begin{tikzpicture}[
+  x=1mm,
+  y=1mm,
+  font=\small,
+  data/.style={
+    draw,
+    rounded corners=1.4pt,
+    fill=blue!7,
+    text width=21mm,
+    minimum height=11mm,
+    align=center,
+    inner sep=4.5pt
+  },
+  process/.style={
+    draw,
+    rounded corners=1.4pt,
+    fill=gray!8,
+    text width=24mm,
+    minimum height=11mm,
+    align=center,
+    inner sep=4.5pt
+  },
+  decision/.style={
+    draw,
+    rounded corners=1.4pt,
+    fill=green!8,
+    text width=24mm,
+    minimum height=11mm,
+    align=center,
+    inner sep=4.5pt
+  },
+  phase/.style={
+    draw,
+    dashed,
+    rounded corners=2pt,
+    inner sep=6pt
+  },
+  phaselabel/.style={font=\small\bfseries, fill=white, inner sep=2pt},
+  flow/.style={
+    -{Latex[length=2.2mm]},
+    line width=0.6pt,
+    shorten >=2pt,
+    shorten <=2pt
+  }
+]
+  \node[data] (prefix) at (0,0) {Visible\\prefix};
+  \node[process] (partition) at (24,0) {Partition into recent\\and historical KV};
+
+  \node[data] (recent) at (48,15) {Exact recent\\window};
+  \node[data] (hist) at (48,-15) {Historical\\blocks};
+
+  \node[process] (compress) at (74,-15) {Anchor-residual encoding\\with indexed storage};
+  \node[decision] (prefilter) at (100,-15) {\fp{} prefilter\\rejects only};
+  \node[decision] (mpfr) at (100,15) {Rigorous certificate\\Bound \(\le \varepsilon\): skip\\otherwise: retain};
+  \node[process, text width=25mm] (attend) at (126,0) {Reconstruct retained\\history and attend};
+
+  \node[phase, fit=(partition)(recent)(hist)] (phasea) {};
+  \node[phaselabel, above=1.5mm of phasea.north] {1. Partition};
+  \node[phase, fit=(compress)] (phaseb) {};
+  \node[phaselabel, above=1.5mm of phaseb.north] {2. Compress};
+  \node[phase, fit=(prefilter)(mpfr)] (phasec) {};
+  \node[phaselabel, above=1.5mm of phasec.north] {3. Certify};
+  \node[phase, fit=(attend)] (phased) {};
+  \node[phaselabel, above=1.5mm of phased.north] {4. Attend};
+
+  \draw[flow] (prefix.east) -- (partition.west);
+  \draw[flow] (partition.east) -- ++(6mm,0) |- (recent.west);
+  \draw[flow] (partition.east) -- ++(6mm,0) |- (hist.west);
+  \draw[flow] (hist.east) -- (compress.west);
+  \draw[flow] (compress.east) -- (prefilter.west);
+  \draw[flow] (prefilter.north) -- ++(0,6mm) -| (mpfr.south);
+  \draw[flow] (mpfr.east) -- ++(6mm,0) |- (attend.north);
+  \draw[flow] (recent.east) -- ++(8mm,0) |- (attend.west);
+\end{tikzpicture}

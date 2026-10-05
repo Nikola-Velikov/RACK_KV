@@ -1,0 +1,20 @@
+\section{Related Work}
+
+Research on long-context KV management has taken several distinct directions. Quantization methods preserve the full cache structure while reducing the number of stored bits per vector. KIVI uses asymmetric low-bit treatment for keys and values \citep{liu2024kivi}, and later work has examined other quantized or shared-cache variants such as CommonKV \citep{wang2025commonkv}. These approaches are attractive because they retain all positions, but they do not by themselves reduce the number of attended entries.
+
+Eviction and retrieval methods attack the compute side more directly. H2O retains heavy hitters \citep{zhang2023h2o}; Ada-KV reallocates budgets adaptively across heads \citep{feng2024adakv}; SnapKV uses an observation window to select positions that appear useful for future queries \citep{li2024snapkv}; Quest scores pages or blocks with a query-aware rule \citep{tang2024quest}; and A2ATS argues that value information also matters for token selection \citep{guo2024a2ats}. These methods can reduce attention cost, but they are primarily heuristic or predictive. Their selection rules are not local error certificates in the sense studied here.
+
+Residual and reference-based compression lines are closer in spirit to RACK-KV because they exploit temporal structure in historical states. DeltaKV compresses through long-range residual similarity \citep{hao2026deltakv}, OjaKV uses online low-rank structure \citep{zhu2025ojakv}, EchoKV reconstructs from similarity-based summaries \citep{ji2026echokv}, and probabilistic language tries provide a sequential predictive viewpoint on KV compression \citep{magarshak2026pltries}. These methods show that historical KV states contain exploitable structure, but they do not simultaneously provide an independently decodable random-access format together with a formal skip certificate.
+
+System work on memory organization provides a different piece of the puzzle. PagedAttention addresses efficient paging and allocation for serving \citep{kwon2023pagedattention}. InfLLM and related context-memory systems restructure access to long contexts \citep{xiao2024infllm}. DeepSeek-V2 reduces KV demand partly through architectural changes rather than cache compression alone \citep{deepseekai2024deepseekv2}. These systems motivate the importance of access patterns and bandwidth, but they do not offer the same local theorem for attention-output error under skipping.
+
+\begin{table}[t]
+  \centering
+  \small
+  \input{tables/main_related_work.tex}
+  \caption{Compact comparison with representative long-context methods. The project baselines labeled \enquote{-style} are source-inspired approximations rather than exact reproductions of the original systems.}
+  \label{tab:related}
+\end{table}
+
+\paragraph{Provisional corpus-bounded novelty assessment.}
+No fully verified work in the frozen corpus was found that combines sequence-aware or reference-based KV compression, independently decodable random-access compressed blocks, and a formal safe-skipping certificate in one inference-time system. This statement is deliberately narrow. It is not a claim of absolute worldwide novelty, it is limited to the frozen July 2026 corpus, and individual ingredients of RACK-KV overlap prior lines of work. DeltaKV is the strongest direct overlap on residual-style compression; probabilistic language tries are the main threat on sequential predictive coding; and Quest is adjacent on query-aware block scoring, although without the same certified local output bound.

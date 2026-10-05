@@ -1,0 +1,39 @@
+\section{Background and Problem Formulation}
+
+For one query vector \(q \in \R^d\) and visible cached keys and values \(\{(k_i,v_i)\}_{i=1}^n\), standard causal attention computes
+\begin{equation}
+  s_i = \frac{q^\T k_i}{\sqrt{d}}, \qquad
+  \alpha_i = \frac{\expf(s_i)}{\sum_{j=1}^n \expf(s_j)}, \qquad
+  o = \sum_{i=1}^n \alpha_i v_i.
+\end{equation}
+The KV cache stores all visible pairs \((k_i,v_i)\) so that future tokens can attend to them without recomputing earlier layers. In a long session, the memory required for these cached pairs grows approximately linearly with the number of visible tokens.
+
+The model family considered here uses grouped-query attention. There are \(H_q=32\) query heads and \(H_{kv}=8\) KV heads, so four query heads share each KV head. This detail matters for skipping. A certificate may show that one query head can ignore a particular KV-head block without violating the local bound, yet the shared physical block must still be retained if another query head mapped to the same KV head needs it.
+
+RACK-KV divides the visible prefix into two regions. The most recent \(W\) tokens remain exact. Older tokens are partitioned into historical blocks of size at most \(B\). For one attention evaluation, the original uncompressed output over the visible prefix is denoted by \(o_{\exact}\). The output computed after reconstructing every compressed historical block is denoted by \(\hat{o}_{\full}\). After certified skipping removes a subset of reconstructed historical contributions, the resulting output is denoted by \(\hat{o}_{\kept}\). The distinction between these three quantities is essential:
+\begin{itemize}[leftmargin=1.5em]
+  \item \(o_{\exact}\) measures attention over the original cached tensors.
+  \item \(\hat{o}_{\full}\) measures attention over the fully reconstructed compressed cache.
+  \item \(\hat{o}_{\kept}\) measures attention over the reconstructed cache after certified skipping.
+\end{itemize}
+
+The first gap, \(\norm{o_{\exact}-\hat{o}_{\full}}\), is compression error. The second, \(\norm{\hat{o}_{\full}-\hat{o}_{\kept}}\), is skipping error. RACK-KV currently certifies only the second term.
+
+\begin{table}[t]
+  \centering
+  \small
+  \input{tables/main_notation.tex}
+  \caption{Notation used throughout the paper.}
+  \label{tab:notation}
+\end{table}
+
+Two levels of skip semantics will recur throughout the paper.
+\begin{definition}[Logical query-head skip]
+For one query head and one query position, a logical skip omits the contribution of one historical KV-head block from that head's reconstructed attention computation.
+\end{definition}
+
+\begin{definition}[Physical block omission]
+A physical omission avoids decoding or loading a KV-head block altogether. Under GQA, that requires all query heads mapped to the shared KV head to agree that the block is unnecessary, or an equivalent group-level certificate.
+\end{definition}
+
+The experiments below establish logical skip decisions and local output control on real traces. They do not yet establish physical decode avoidance.

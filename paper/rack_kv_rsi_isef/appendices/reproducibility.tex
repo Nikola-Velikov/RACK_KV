@@ -1,0 +1,38 @@
+\section{Reproducibility Checklist}
+\label{app:repro}
+
+The paper is designed to be reproducible from local evidence without rerunning model inference during manuscript compilation. Verified artifacts are first converted into compact CSV and JSON summaries by \artifactpath{scripts/extract_verified_data.py}; the manuscript then reads only those derived files.
+
+\begin{table}[h]
+  \centering
+  \small
+  \begin{threeparttable}
+  \begin{tabularx}{\linewidth}{@{}lX@{}}
+  \toprule
+  Item & Value \\
+  \midrule
+  Repository source & Local workspace clone of the RACK-KV project repository \\
+  Model repository & \texttt{\modelrepo} \\
+  Exact model revision & \texttt{\modelrevision} \\
+  Execution device for verified experiments & CPU \\
+  Core configuration & \(W=16\), \(B=8\), tolerance \(0.05\), seed 0, 256-bit multiprecision skip authorization \\
+  Representative-layer scope & Layers 0, 8, 16, 24, and 31; 22 query positions; 3 selected query heads \\
+  Layer-0 safety-validation scope & All 32 query heads and all 8 KV heads at layer 0 only \\
+  Python & 3.13.5 \\
+  PyTorch & 2.13.0+cpu \\
+  Transformers & 5.14.1 \\
+  NumPy & 2.1.3 \\
+  gmpy2 & 2.2.1 \\
+  safetensors & 0.8.0 \\
+  Operating system & Windows 11 (build 26200 series) \\
+  Key source modules & \texttt{rack\_kv/codec.py}, \texttt{rack\_kv/certificate.py}, \texttt{rack\_kv/stage4.py}, \texttt{rack\_kv/stage5.py}, \texttt{rack\_kv/llama\_trace.py} \\
+  Paper build entry points & \texttt{build.ps1}, \texttt{build.sh}, \texttt{scripts/package\_source.py} \\
+  Inference during paper build & None; the build reads verified local artifacts only \\
+  \bottomrule
+  \end{tabularx}
+  \end{threeparttable}
+  \caption{Concise reproducibility record. Additional source-level evidence appears in the packaged source manifest, evidence matrix, and extracted CSV files.}
+  \label{tab:repro}
+\end{table}
+
+The current paper package intentionally omits model weights, tensor caches, and full experiment checkpoints. It includes only the compact evidence required to rebuild the manuscript, audit the reported numbers, and update the paper once a verified full-model quality package becomes available.

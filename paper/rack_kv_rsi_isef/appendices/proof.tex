@@ -1,0 +1,74 @@
+\section{Complete Proof of the Certified-Skipping Theorem}
+\label{app:proof}
+
+We restate the theorem in a self-contained way.
+
+\begin{theorem}[Restated]
+Let
+\begin{align}
+  Z_K &= \sum_{i \in K} \expf(s_i), &
+  Z_S &= \sum_{i \in S} \expf(s_i),\\
+  N_K &= \sum_{i \in K} \expf(s_i) v_i, &
+  N_S &= \sum_{i \in S} \expf(s_i) v_i,
+\end{align}
+with
+\begin{equation}
+  o_K = \frac{N_K}{Z_K},
+  \qquad
+  o_\full = \frac{N_K + N_S}{Z_K + Z_S}.
+\end{equation}
+Assume
+\begin{align}
+  Z_S &\le U_S, \\
+  Z_K &\ge L_K > 0, \\
+  \norm{v_i} &\le \nu_S \quad \forall i \in S, \\
+  \norm{o_K} &\le B_K.
+\end{align}
+Then
+\begin{equation}
+  \norm{o_\full - o_K}
+  \le
+  \frac{U_S}{L_K + U_S}(\nu_S + B_K).
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+Starting from the exact identity,
+\begin{equation}
+  o_\full - o_K = \frac{N_S - Z_S o_K}{Z_K + Z_S}.
+\end{equation}
+Take norms and apply the triangle inequality:
+\begin{equation}
+  \norm{o_\full - o_K}
+  \le
+  \frac{\norm{N_S} + Z_S \norm{o_K}}{Z_K + Z_S}.
+\end{equation}
+For the skipped numerator,
+\begin{align}
+  \norm{N_S}
+  &=
+  \left\lVert \sum_{i \in S} \expf(s_i) v_i \right\rVert \\
+  &\le
+  \sum_{i \in S} \expf(s_i)\norm{v_i}
+  \le
+  \sum_{i \in S} \expf(s_i)\nu_S
+  = Z_S \nu_S.
+\end{align}
+Using also $\norm{o_K} \le B_K$,
+\begin{equation}
+  \norm{o_\full - o_K}
+  \le
+  \frac{Z_S(\nu_S + B_K)}{Z_K + Z_S}.
+\end{equation}
+Now substitute the conservative bounds $Z_S \le U_S$ and $Z_K \ge L_K$:
+\begin{equation}
+  \norm{o_\full - o_K}
+  \le
+  \frac{U_S(\nu_S + B_K)}{L_K + U_S}.
+\end{equation}
+This proves the claim.
+\end{proof}
+
+\begin{remark}
+The proof relies only on standard ingredients: exact algebraic rearrangement, the triangle inequality, norm monotonicity, and Cauchy--Schwarz for the geometric logit cap. The claim of interest is the co-designed use of these ingredients with the block-local compressed representation and random-access metadata, not novelty of the inequalities themselves.
+\end{remark}

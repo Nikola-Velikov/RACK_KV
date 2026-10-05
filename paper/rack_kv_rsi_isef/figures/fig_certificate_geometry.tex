@@ -1,0 +1,41 @@
+\begin{tikzpicture}[
+  x=1mm,
+  y=1mm,
+  font=\small,
+  flow/.style={-{Latex[length=2.0mm]}, line width=0.6pt, shorten >=2pt, shorten <=2pt},
+  callout/.style={
+    draw,
+    rounded corners=1.5pt,
+    fill=white,
+    text width=40mm,
+    align=left,
+    inner sep=5pt
+  }
+]
+  \coordinate (c) at (0,0);
+  \fill[blue!7] (c) circle (17mm);
+  \draw[thick, blue!60!black] (c) circle (17mm);
+  \fill[blue!70!black] (c) circle (1.4pt);
+  \node at (-4,-4) {\(a_m\)};
+
+  \foreach \p in {(8,7),(-8,5),(5,-10),(-3,-12)} {
+    \fill[blue!60!black] \p circle (1.2pt);
+  }
+
+  \draw[dashed] (c) -- (8,7);
+  \node at (0,-22) {\(\norm{\hat{k}_{m,t}-a_m}\le \rho_m\)};
+
+  \draw[flow] (c) -- (28,15);
+  \node at (31,18) {\(q\)};
+
+  \node[callout] (box) at (62,2)
+  {For every reconstructed key in block \(m\),
+  \[
+    q^\T \hat{k}_{m,t}
+    \le
+    q^\T a_m + \norm{q}\rho_m.
+  \]
+  Exponentiating this inequality gives a conservative upper bound on the block's softmax mass.};
+
+  \draw[flow] (17,8) -- (box.west);
+\end{tikzpicture}

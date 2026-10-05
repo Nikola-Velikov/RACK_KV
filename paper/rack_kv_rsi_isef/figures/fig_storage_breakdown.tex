@@ -1,0 +1,25 @@
+\begin{tikzpicture}
+\begin{axis}[
+  width=\linewidth,
+  height=7.4cm,
+  ybar stacked,
+  bar width=12pt,
+  ymin=0,
+  ymax=95,
+  ylabel={Mean serialized bytes (kB)},
+  symbolic x coords={RACK-KV,Uniform INT8,SnapKV-style,Quest-style,KIVI-style},
+  xtick=data,
+  xticklabel style={font=\scriptsize, align=center},
+  yticklabel style={font=\small},
+  legend style={draw=none, fill=none, font=\scriptsize, legend columns=2, at={(0.5,1.02)}, anchor=south},
+  nodes near coords={},
+  enlarge x limits=0.08
+]
+  \addplot+[fill=blue!55] coordinates {(RACK-KV,23.40) (Uniform INT8,20.78) (SnapKV-style,23.49) (Quest-style,23.48) (KIVI-style,5.20)};
+  \addplot+[fill=blue!30] coordinates {(RACK-KV,23.40) (Uniform INT8,20.78) (SnapKV-style,23.49) (Quest-style,23.48) (KIVI-style,5.20)};
+  \addplot+[fill=orange!55] coordinates {(RACK-KV,0.08) (Uniform INT8,0.65) (SnapKV-style,0.00) (Quest-style,0.00) (KIVI-style,1.16)};
+  \addplot+[fill=gray!45] coordinates {(RACK-KV,1.12) (Uniform INT8,0.88) (SnapKV-style,1.03) (Quest-style,1.02) (KIVI-style,1.06)};
+  \addplot+[fill=green!55] coordinates {(RACK-KV,8.19) (Uniform INT8,8.19) (SnapKV-style,8.19) (Quest-style,8.19) (KIVI-style,8.19)};
+  \legend{Encoded keys,Encoded values,Scales,Metadata + index,Recent window}
+\end{axis}
+\end{tikzpicture}

@@ -1,0 +1,17 @@
+\begin{threeparttable}
+\footnotesize
+\setlength{\tabcolsep}{1.5pt}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{1.8cm}>{\raggedright\arraybackslash}p{1.6cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
+\toprule
+Claim & Status & Supporting evidence & Limitation \\
+\midrule
+Independent block decoding after serialization & Verified & Codec source and decode-equality tests & Applies to the implemented format only \\
+About one-third representative-layer storage reduction & Observed & Representative-layer benchmark aggregates & Limited to one model and traced cases \\
+Better matched-budget accuracy than SnapKV-style and Quest-style baselines & Observed & Matched-budget benchmark results & Baselines are source-inspired \\
+No observed certificate violation in skipped cases & Observed & Certificate records and aggregate audit & Not a universal proof \\
+Logical skips do not yet imply physical GQA omission & Verified & GQA design plus layer-0 safety audit & Group-level certification remains future work \\
+Full-model quality evidence remains incomplete & Verified & Stage 5 status record & End-to-end conclusions are withheld \\
+Novelty claim is corpus-bounded & Provisional & Frozen literature audit & Future literature may change the assessment \\
+\bottomrule
+\end{tabularx}
+\end{threeparttable}

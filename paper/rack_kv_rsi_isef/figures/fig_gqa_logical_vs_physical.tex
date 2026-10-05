@@ -1,0 +1,65 @@
+\begin{tikzpicture}[
+  x=1mm,
+  y=1mm,
+  font=\small,
+  q/.style={
+    draw,
+    rounded corners=1.4pt,
+    text width=8mm,
+    minimum height=8mm,
+    fill=gray!10,
+    align=center,
+    inner sep=3pt
+  },
+  decision/.style={
+    draw,
+    rounded corners=1.4pt,
+    text width=14mm,
+    minimum height=8.5mm,
+    fill=blue!8,
+    align=center,
+    inner sep=3pt
+  },
+  group/.style={
+    draw,
+    rounded corners=1.4pt,
+    text width=31mm,
+    minimum height=10.5mm,
+    fill=green!8,
+    align=center,
+    inner sep=4pt
+  },
+  kv/.style={
+    draw,
+    rounded corners=1.4pt,
+    text width=28mm,
+    minimum height=10.5mm,
+    fill=gray!8,
+    align=center,
+    inner sep=4pt
+  },
+  flow/.style={-{Latex[length=2.0mm]}, line width=0.6pt, shorten >=2pt, shorten <=2pt}
+]
+  \node[q] (q0) at (0,0) {\(q_0\)};
+  \node[q] (q1) at (18,0) {\(q_1\)};
+  \node[q] (q2) at (36,0) {\(q_2\)};
+  \node[q] (q3) at (54,0) {\(q_3\)};
+
+  \node[decision] (d0) at (0,-13) {logical\\skip};
+  \node[decision] (d1) at (18,-13) {logical\\skip};
+  \node[decision] (d2) at (36,-13) {logical\\keep};
+  \node[decision] (d3) at (54,-13) {logical\\skip};
+
+  \node[group] (agg) at (27,-31) {Group-level physical\\eligibility check};
+  \node[kv] (kv) at (27,-47) {Shared KV-head\\block};
+  \node[group] (phys) at (27,-63) {Physical decode\\decision};
+
+  \foreach \src/\dst in {q0/d0,q1/d1,q2/d2,q3/d3} {
+    \draw[flow] (\src.south) -- (\dst.north);
+  }
+  \foreach \src in {d0,d1,d2,d3} {
+    \draw[flow] (\src.south) -- ++(0,-5mm) -| (agg.north);
+  }
+  \draw[flow] (agg.south) -- (kv.north);
+  \draw[flow] (kv.south) -- (phys.north);
+\end{tikzpicture}

@@ -1,0 +1,10 @@
+# Observed freeze environment; Python 3.13.5, Windows CPU execution.
+# Exact OS/Python/Torch build strings are in each run manifest.
+gmpy2==2.2.1
+numpy==2.1.3
+requests==2.32.3
+safetensors==0.8.0
+torch==2.13.0
+transformers==5.14.1
+psutil==5.9.0
+matplotlib==3.10.0

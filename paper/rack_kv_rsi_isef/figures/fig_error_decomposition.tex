@@ -1,0 +1,28 @@
+\begin{tikzpicture}[
+  x=1mm,
+  y=1mm,
+  font=\small,
+  state/.style={
+    draw,
+    rounded corners=1.5pt,
+    align=center,
+    text width=29mm,
+    minimum height=12mm,
+    fill=gray!8,
+    inner sep=5pt
+  },
+  ann/.style={align=center, inner sep=2pt},
+  flow/.style={-{Latex[length=2.0mm]}, line width=0.6pt, shorten >=2pt, shorten <=2pt}
+]
+  \node[state] (exact) at (0,0) {Original attention\\over exact KV};
+  \node[state] (recon) at (47,0) {Attention over the\\fully reconstructed\\compressed cache};
+  \node[state] (kept) at (94,0) {Attention after\\certified skipping\\on reconstructed KV};
+
+  \node[ann] at (24,13) {compression error\\(empirical)};
+  \node[ann] at (71,13) {certified skipping error\\(rigorously bounded)};
+  \node[ann] at (47,25) {total local error\\(not yet fully certified)};
+
+  \draw[flow] (exact.east) -- (recon.west);
+  \draw[flow] (recon.east) -- (kept.west);
+  \draw[decorate, decoration={brace, amplitude=4pt}] (exact.north west) -- (kept.north east);
+\end{tikzpicture}

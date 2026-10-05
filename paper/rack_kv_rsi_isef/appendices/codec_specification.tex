@@ -1,0 +1,28 @@
+\section{Codec and Serialization Specification}
+\label{app:codec}
+
+The verified codec stores each historical block as a self-contained payload. For block \(m\), the payload contains:
+\begin{enumerate}[leftmargin=1.6em]
+  \item the block start index and block length;
+  \item the key anchor \(a^K_m\) and value anchor \(a^V_m\) in \texttt{fp16};
+  \item one \texttt{fp16} key-residual scale \(s^K_m\) and one \texttt{fp16} value-residual scale \(s^V_m\);
+  \item outward-safe geometric metadata \(\rho_m\) and \(\nu_m\);
+  \item signed \texttt{int8} key residuals and signed \texttt{int8} value residuals for the remaining tokens in the block.
+\end{enumerate}
+
+For \(t \ge 1\), the implemented reconstruction rule is
+\begin{equation}
+  \hat{k}_{m,t} = a^K_m + s^K_m q^K_{m,t},
+  \qquad
+  \hat{v}_{m,t} = a^V_m + s^V_m q^V_{m,t},
+\end{equation}
+where \(q^K_{m,t}\) and \(q^V_{m,t}\) are the stored signed \texttt{int8} residual codes. The first token in the block is recovered directly from the anchors.
+
+\paragraph{Container format.}
+Historical blocks are not stored as unrelated files. A container header records the format identifier, block count, and tensor dimensions. An explicit block index then maps each block ID to a byte offset and payload length. Because the index is separate from the payload, the decoder can seek directly to block \(j\) without scanning the earlier blocks.
+
+\paragraph{Independent-decoding contract.}
+The serializer forbids cross-block reference chains. Reconstructing one historical block may depend on its own payload and the global schema constants, but not on any payload or reconstructed state from another block. This invariant is tested by decoding selected blocks independently and comparing the result with the corresponding block extracted from a full-container decode.
+
+\paragraph{Byte accounting.}
+The current runtime distinguishes disjoint storage categories rather than reporting only an aggregate payload length. The authoritative categories are encoded keys, encoded values, quantization scales, anchors, recent-window bytes, block metadata, index bytes, certificate-only metadata when present, container headers, and any uncategorized serialized bytes. For every reported record, these categories are required to sum exactly to the total serialized payload.

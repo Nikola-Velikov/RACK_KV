@@ -1,0 +1,43 @@
+\documentclass[11pt]{article}
+
+\input{metadata}
+\input{macros}
+
+\title{\papertitle}
+\author{
+  \authorname\\
+  \authoraffiliation\\
+  \normalsize \mentorline
+}
+\date{July 28, 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\input{sections/abstract}
+\end{abstract}
+
+\input{sections/introduction}
+\input{sections/background}
+\input{sections/related_work}
+\input{sections/method}
+\input{sections/random_access}
+\input{sections/certification}
+\input{sections/theory}
+\input{sections/experiments}
+\input{sections/results}
+\input{sections/discussion}
+\input{sections/limitations}
+\input{sections/conclusion}
+\input{sections/acknowledgments}
+
+\balance
+\begingroup
+\small
+\setlength{\bibsep}{0pt plus 0.2ex}
+\bibliographystyle{plainnat}
+\bibliography{references}
+\endgroup
+
+\end{document}

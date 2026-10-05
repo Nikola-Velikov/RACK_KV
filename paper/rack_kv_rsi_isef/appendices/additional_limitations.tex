@@ -1,0 +1,15 @@
+\section{Additional Limitations and Open Questions}
+\label{app:addl-limits}
+
+Several open problems follow directly from the results in the main paper.
+\begin{enumerate}[leftmargin=1.6em]
+  \item Why is the certificate conservative enough that only a small fraction of logical block decisions are skippable?
+  \item Can richer block geometry, such as multiple representatives or directional summaries, increase skip rates without sacrificing rigor?
+  \item Can group-level certification be defined so that logical query-head skips become physical GQA block omissions before reconstruction?
+  \item Can compression error be bounded tightly enough to combine with the current theorem into a useful one-layer guarantee?
+  \item How should local approximation bounds propagate through output projection, residual connections, normalization, MLPs, and later layers?
+  \item Does the method generalize beyond the single model family studied here?
+  \item Does an eventual GPU implementation produce measurable bandwidth or latency gains once physical omission is possible?
+\end{enumerate}
+
+These questions are included because they delimit the present contribution. The current paper gives local theory and representative-layer evidence, not a finished answer to all of them.

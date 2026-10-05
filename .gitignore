@@ -1,0 +1,39 @@
+# Generated scientific outputs
+results/
+.tmp/
+outputs/
+artifacts/
+logs/
+
+# Local environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+
+# Local model and trace data
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.npy
+*.npz
+*.pkl
+
+# Generated documents and archives
+*.pdf
+*.zip
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+
+# Local secrets and machine-specific files
+.env
+.env.*
+private/

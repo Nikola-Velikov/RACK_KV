@@ -1,0 +1,42 @@
+\begin{tikzpicture}[
+  x=1mm,
+  y=1mm,
+  font=\small,
+  slot/.style={
+    draw,
+    rounded corners=1.4pt,
+    minimum height=9mm,
+    align=center,
+    inner sep=4pt
+  },
+  header/.style={slot, fill=gray!18, text width=14mm},
+  index/.style={slot, fill=gray!10, text width=10mm},
+  payload/.style={slot, fill=blue!10, text width=12mm},
+  payloadwide/.style={slot, fill=blue!18, text width=14mm},
+  flow/.style={-{Latex[length=2.0mm]}, line width=0.6pt, shorten >=2pt, shorten <=2pt},
+  note/.style={font=\small, inner sep=2pt}
+]
+  \node[header] (hdr) at (0,0) {global\\header};
+  \node[index] (idx0) at (15,0) {offset 0};
+  \node[index] (idx1) at (28,0) {offset 1};
+  \node[index] (dots1) at (41,0) {\(\cdots\)};
+  \node[index] (idxj) at (54,0) {offset \(j\)};
+  \node[index] (dots2) at (67,0) {\(\cdots\)};
+  \node[payload] (payj) at (83,0) {payload \(j\)};
+  \node[payload] (decoder) at (106,0) {decode\\block \(j\)};
+
+  \node[note] at (8,10) {container and index};
+  \node[note] at (54,10) {direct byte access};
+
+  \node[payload]     (meta) at (46,-20) {block\\header};
+  \node[payload]     (ak)   at (60,-20) {anchor\\K};
+  \node[payload]     (av)   at (74,-20) {anchor\\V};
+  \node[payloadwide] (rk)   at (90,-20) {int8 key\\residuals};
+  \node[payloadwide] (rv)   at (108,-20) {int8 value\\residuals};
+  \node[payload]     (sc)   at (124,-20) {scales};
+  \node[payload]     (geom) at (138,-20) {\(\rho_m,\nu_m\)};
+
+  \draw[flow] (idxj.south) -- ++(0,-5mm) -| (payj.north);
+  \draw[flow] (payj.south) -- ++(0,-6mm) -| (meta.north);
+  \draw[flow] (geom.north) -- ++(0,7mm) -| (decoder.south);
+\end{tikzpicture}

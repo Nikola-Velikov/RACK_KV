@@ -1,0 +1,37 @@
+\section{Numerical Certification Contract}
+\label{app:numerics}
+
+The local theorem is instantiated numerically through a rigorous contract, not only through floating-point estimates.
+
+\subsection{Authoritative rigorous path}
+
+The authoritative certification path uses \mpfr{} arithmetic via \texttt{gmpy2} with directed rounding. The main verified experiments use 256-bit precision. The implementation stores outward-safe scalar representations and treats numerical uncertainty conservatively.
+
+\subsection{Non-authorizing \fp{} prefilter}
+
+The repaired implementation allows a cheap \fp{} prefilter to reject clearly unsafe candidates before expensive \mpfr{} work. This prefilter is strictly non-authorizing:
+\begin{enumerate}[label=\arabic*.]
+  \item a failed prefilter means \enquote{keep the block};
+  \item a passed prefilter means only \enquote{send the candidate to \mpfr{}};
+  \item no actual skip is allowed without an \mpfr{} proof record.
+\end{enumerate}
+
+\subsection{Practical safeguards}
+
+The numerical path includes:
+\begin{enumerate}[label=\arabic*.]
+  \item common logit shifting for stability;
+  \item outward-safe $\rho_m$ and $\nu_m$ metadata;
+  \item interval treatment of the kept denominator;
+  \item serialization of authoritative proof-relevant scalars as text or outward-rounded values;
+  \item retention under any uncertainty or fallback.
+\end{enumerate}
+
+\subsection{Observed versus rigorous quantities}
+
+The experiments report both:
+\begin{enumerate}[label=\arabic*.]
+  \item an \emph{observed} skipping error measured by approximate arithmetic over reconstructed tensors;
+  \item a \emph{rigorous} upper bound used for the authoritative violation check.
+\end{enumerate}
+Only the second is certifying.

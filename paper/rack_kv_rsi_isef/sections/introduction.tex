@@ -1,0 +1,19 @@
+\section{Introduction}
+
+Autoregressive Transformers reuse earlier computation by caching the key and value vectors produced for previous tokens. The cost of this convenience is linear growth in memory: every new token extends the cache, and long conversations or document contexts can push the stored KV state far beyond the size of the active hidden state. That burden is especially acute in grouped-query attention (GQA) models, where the cache is shared across many future queries and remains resident for the entire visible prefix.
+
+Compression alone does not solve the full inference problem. Low-bit quantization can reduce storage substantially, but the model still attends to every retained entry. Eviction methods go further by discarding tokens or pages, yet they trade memory and compute savings against irreversible information loss. Query-aware retrieval methods make that trade more selective, but in general they remain heuristic: they predict which cached entries seem important instead of proving that the omitted entries can change the attention output by at most a prescribed amount.
+
+A second difficulty is random access. Historical KV states are not useful if reconstructing one block requires replaying a long dependency chain of earlier blocks. Long-range residual or predictive coding can be effective for compression, but it tends to couple block \(j\) to the reconstruction of blocks \(0,\dots,j-1\). That dependence is acceptable for linear scans and poor for selective retrieval. A practical long-context representation therefore has to balance three goals at once: compact storage, direct access to selected historical regions, and a principled rule for deciding when a region can be ignored safely.
+
+RACK-KV addresses this joint problem. The method keeps a short recent window exact, compresses older KV states into independently serialized block-local anchor/residual codes, stores compact geometric metadata for each block, and uses a query-dependent certificate to determine when a block's contribution to attention can be omitted. The skip decision is conservative by design. A cheap \fp{} prefilter may reject obviously unsafe candidates, but only the rigorous multiprecision certificate may authorize a skip; uncertainty always leads to retention.
+
+The paper studies the following central question: can historical Transformer KV-cache information be compressed into independently decodable blocks while also supporting a mathematically certified rule for skipping selected blocks during attention? The main contributions are:
+\begin{enumerate}[leftmargin=1.6em,label=(\roman*)]
+  \item a block-local sequence-aware KV codec whose historical blocks remain independently decodable after serialization;
+  \item a compact per-block geometric summary that supports conservative query-dependent bounds on skipped softmax mass;
+  \item a rigorous local theorem bounding the effect of certified skipping on reconstructed attention outputs; and
+  \item an empirical evaluation on real \modeldisplay{} KV traces, including comparisons against quantization, retrieval, and matched-memory selection baselines.
+\end{enumerate}
+
+The evidence now has two levels. Representative-layer experiments isolate the local storage--accuracy tradeoff and the behavior of the certificate on real KV states. A separate verified 32-layer teacher-forced evaluation on two short prompt categories measures how those local approximations affect final logits and token probabilities when the modified streams are propagated through the full model. Even with that end-to-end result in hand, the boundaries remain important: the certificate is conservative, logical query-head skips do not yet imply physical GQA block omission, and the full-model evaluation is intentionally narrow rather than a broad benchmark. The remainder of the paper develops the method with those boundaries stated explicitly.

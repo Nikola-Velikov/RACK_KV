@@ -1,0 +1,24 @@
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.98\linewidth,
+  height=6.0cm,
+  xlabel={Tolerance},
+  ylabel={Weighted certified skip fraction (\%)},
+  xmin=-0.005,
+  xmax=0.105,
+  ymin=0,
+  ymax=0.26,
+  grid=both,
+  major grid style={gray!20},
+  minor grid style={gray!10},
+  tick label style={font=\small},
+  label style={font=\small}
+]
+  \addplot[mark=*, mark size=2pt, color=blue!70!black, thick]
+    table[
+      col sep=comma,
+      x=tolerance,
+      y expr=\thisrow{weighted_skipped_block_fraction}*100
+    ]{data/stage2b_tolerance_summary.csv};
+\end{axis}
+\end{tikzpicture}

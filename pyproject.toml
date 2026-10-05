@@ -1,0 +1,16 @@
+[project]
+name = "rack-kv-mvp"
+version = "0.1.0"
+description = "Offline RACK-KV MVP prototype with rigorous reference certification."
+requires-python = ">=3.11"
+dependencies = [
+  "gmpy2>=2.2",
+  "numpy>=1.26",
+  "requests>=2.31",
+  "safetensors>=0.4",
+  "torch>=2.1",
+  "transformers>=4.44",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

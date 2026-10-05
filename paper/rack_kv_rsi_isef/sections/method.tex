@@ -1,0 +1,75 @@
+\section{RACK-KV}
+
+\begin{figure*}[t]
+  \centering
+  \input{figures/fig_system_overview.tex}
+  \caption{RACK-KV as a co-designed storage and attention pipeline. The visible prefix is split into an exact recent window and compressed historical blocks. Historical blocks are encoded independently, stored with local metadata, screened by a cheap non-authorizing prefilter, and skipped only when the rigorous certificate proves that the local reconstructed attention error is at most the requested tolerance.}
+  \label{fig:overview}
+\end{figure*}
+
+\subsection{Design Objectives}
+
+RACK-KV is motivated by a three-way tension. First, the historical cache should be compressed aggressively enough to reduce serialized storage. Second, the representation should preserve direct access to a selected historical block, because query-aware attention does not benefit from a format that must be decoded sequentially from the beginning of the prefix. Third, any attempt to omit historical information from attention should come with an explicit safety condition rather than only a heuristic notion of importance. These goals are coupled. A representation that compresses well but destroys independent access is poorly suited to selective retrieval, and a local certificate is operationally weak if the blocks it certifies cannot be addressed independently.
+
+For the historical cache \(C_{\hist}\), one can view the design problem conceptually as
+\begin{equation}
+  \min_{\mathcal{R},\,\mathcal{M}} \ \operatorname{bytes}\!\bigl(\mathcal{R}(C_{\hist})\bigr)
+  \quad
+  \text{subject to}
+  \quad
+  \begin{cases}
+    \text{bounded reconstruction distortion,}\\
+    \text{independent block decoding,}\\
+    \text{attention-compatible reconstruction,}\\
+    \text{metadata sufficient for certification.}
+  \end{cases}
+\end{equation}
+Here \(\mathcal{R}\) denotes the serialized representation and \(\mathcal{M}\) the accompanying metadata. This is a design objective rather than a solved global optimization problem. The point is that storage reduction alone is not the only criterion: the representation must still support downstream attention computations and conservative block screening.
+
+\subsection{Cache Partitioning}
+
+Let the visible cache at one layer and one KV head be
+\begin{equation}
+  C = \{(k_i,v_i)\}_{i=1}^{T}.
+\end{equation}
+RACK-KV partitions \(C\) into a recent exact window and an older historical region:
+\begin{equation}
+  C = C_{\recent} \cup C_{\hist},
+  \qquad
+  C_{\recent} = \{(k_i,v_i)\}_{i=T-W+1}^{T}.
+\end{equation}
+The recent window remains exact because it is both strongly attended and relatively small. The remaining prefix is partitioned into blocks
+\begin{equation}
+  C_{\hist} = B_1 \cup B_2 \cup \cdots \cup B_M,
+\end{equation}
+with \(\abs{B_m}\le B\) for every historical block \(B_m\). Fixed-size blocking is not required by the theorem, but it gives a clear storage layout and a stable unit for metadata, serialization, and candidate screening.
+
+This partition already encodes a modeling decision. RACK-KV does not attempt to compress all visible tokens uniformly. It treats recency as a structural prior: the newest part of the cache is kept exact, while the older part absorbs compression overhead and any certified skipping. That asymmetry is deliberate because nearby context is both more likely to matter and less likely to dominate the total byte count.
+
+\subsection{Block-Local Sequence-Aware Compression}
+
+Consider one historical block \(m\) with \(n_m\) tokens. Let its key vectors be \(k_{m,0},\dots,k_{m,n_m-1}\) and its value vectors be \(v_{m,0},\dots,v_{m,n_m-1}\). The implementation stores the first key and value as anchors,
+\begin{equation}
+  a^K_m = k_{m,0}, \qquad a^V_m = v_{m,0},
+\end{equation}
+and encodes later entries relative to those anchors:
+\begin{equation}
+  r^K_{m,t} = k_{m,t} - a^K_m, \qquad
+  r^V_{m,t} = v_{m,t} - a^V_m, \qquad t \ge 1.
+\end{equation}
+This representation is sequence-aware because the anchor is the earliest token of the block and every later residual is measured against that local reference point. The design is intentionally local. Restricting the reference to the same block prevents dependencies from propagating across the entire historical cache. As a result, retrieving block \(m\) does not require decoding blocks \(0,\dots,m-1\).
+
+The current codec quantizes key residuals and value residuals separately with one scalar scale per block and per tensor type. If \(s^K_m>0\) and \(s^V_m>0\) denote those scales, the key residual quantizer is
+\begin{equation}
+  q^K_{m,t} = \operatorname{clip}\!\left(\operatorname{round}\!\left(\frac{r^K_{m,t}}{s^K_m}\right), -127, 127\right),
+\end{equation}
+with an analogous expression for \(q^V_{m,t}\). Reconstruction then follows the corresponding affine rule,
+\begin{equation}
+  \hat{k}_{m,t} = a^K_m + s^K_m q^K_{m,t},
+  \qquad
+  \hat{v}_{m,t} = a^V_m + s^V_m q^V_{m,t}.
+\end{equation}
+
+The anchor is stored in \texttt{fp16}, the residual payloads in signed \texttt{int8}, and the scales in \texttt{fp16}. For the \modeldisplay{} configuration, keys and values both have dimension \(128\). The current implementation uses one key scale and one value scale per historical block, so the quantization is coarse compared with channel-wise schemes, but the byte structure remains simple and independently decodable.
+
+The scientific role of the anchor is twofold. It reduces residual magnitude when neighboring tokens are correlated, and it supplies a natural representative vector for later geometric certification. The restriction to block-local references prevents a dependency chain from propagating across the historical cache. That choice sacrifices some potentially stronger long-range predictive compression, but it preserves the random-access property that RACK-KV needs at query time. Block size therefore mediates a real tradeoff: larger blocks amortize metadata but can inflate residual range and geometric looseness, whereas smaller blocks improve locality at the cost of more headers and indices.

@@ -1,0 +1,108 @@
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{microtype}
+\usepackage{newtxtext}
+\usepackage{newtxmath}
+\usepackage{amsmath}
+\let\openbox\relax
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{bm}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{siunitx}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{url}
+\usepackage{balance}
+\usepackage{placeins}
+\usepackage{longtable}
+\usepackage{makecell}
+\usepackage{csquotes}
+\usepackage[round,authoryear]{natbib}
+
+\pgfplotsset{compat=1.18}
+\usetikzlibrary{arrows.meta,positioning,calc,fit,backgrounds,shapes.geometric,shapes.misc,decorations.pathreplacing,matrix}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  citecolor=black,
+  urlcolor=blue!50!black,
+  pdftitle={\papertitle},
+  pdfauthor={\authorname}
+}
+
+\captionsetup{font=small,labelfont=bf}
+\raggedbottom
+\setlength{\emergencystretch}{1.5em}
+\hfuzz=5pt
+\vfuzz=5pt
+\setlength{\textfloatsep}{11pt plus 2pt minus 2pt}
+\setlength{\floatsep}{10pt plus 2pt minus 2pt}
+\setlength{\intextsep}{10pt plus 2pt minus 2pt}
+
+\sisetup{
+  detect-all,
+  group-separator={,},
+  group-minimum-digits=4,
+  input-symbols = {()},
+  table-number-alignment = center,
+  table-text-alignment = center,
+  scientific-notation = true
+}
+
+\newtheorem{definition}{Definition}[section]
+\newtheorem{assumption}{Assumption}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{corollary}{Corollary}[section]
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}[section]
+\numberwithin{equation}{section}
+
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\norm}[1]{\ensuremath{\lVert #1 \rVert_2}}
+\newcommand{\abs}[1]{\ensuremath{\lvert #1 \rvert}}
+\newcommand{\inner}[2]{\ensuremath{\left\langle #1, #2 \right\rangle}}
+\newcommand{\softmax}{\ensuremath{\operatorname{softmax}}}
+\newcommand{\expf}{\ensuremath{\operatorname{exp}}}
+\newcommand{\E}{\ensuremath{\mathbb{E}}}
+\newcommand{\T}{\ensuremath{\mathsf{T}}}
+\newcommand{\full}{\ensuremath{\mathrm{full}}}
+\newcommand{\kept}{\ensuremath{\mathrm{kept}}}
+\newcommand{\exact}{\ensuremath{\mathrm{exact}}}
+\newcommand{\orig}{\ensuremath{\mathrm{orig}}}
+\newcommand{\recon}{\ensuremath{\mathrm{recon}}}
+\newcommand{\recent}{\ensuremath{\mathrm{recent}}}
+\newcommand{\hist}{\ensuremath{\mathrm{hist}}}
+\newcommand{\mpfr}{\ensuremath{\mathrm{MPFR}}}
+\newcommand{\fp}{\ensuremath{\mathrm{FP64}}}
+\newcommand{\rackkv}{RACK-KV}
+\newcommand{\methodfull}{Full KV}
+\newcommand{\methodrack}{RACK-KV}
+\newcommand{\methodrackcomp}{RACK-KV compression-only}
+\newcommand{\methodrackcert}{RACK-KV certified}
+\newcommand{\methodint}{Uniform INT8 KV}
+\newcommand{\methodkivi}{KIVI-style}
+\newcommand{\methodsnap}{SnapKV-style}
+\newcommand{\methodquest}{Quest-style}
+\newcommand{\todoresult}[1]{\textbf{[Missing verified result: #1]}}
+\newcommand{\artifactpath}[1]{\texttt{\detokenize{#1}}}
+
+\newenvironment{threeparttable}{\par\medskip}{\par\medskip}
+\newenvironment{tablenotes}[1][]{\begin{list}{}{\leftmargin=1.2em\rightmargin=0pt}\footnotesize}{\end{list}}
+
+\makeatletter
+\providecommand{\theHALG@line}{\thealgorithm.\arabic{ALG@line}}
+\makeatother

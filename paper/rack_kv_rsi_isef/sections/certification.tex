@@ -1,0 +1,31 @@
+\subsection{Query-Dependent Certified Skipping}
+For one query position and one query head, RACK-KV evaluates historical blocks in a cautious sequence. A cheap \fp{} prefilter first rejects candidates that are obviously unsafe. Surviving candidates are then passed to a rigorous directed-rounding \mpfr{} routine that evaluates the actual local bound used by the theorem. The decision rule is
+\begin{equation}
+  \text{skip block } m
+  \quad \Longrightarrow \quad
+  \operatorname{Bound}_m(q) \le \varepsilon,
+\end{equation}
+where \(\varepsilon\) is the user-specified local tolerance. The implication is one-way: a block may fail to be skipped even when its true effect is small, because the certificate is conservative. What matters is that the converse is forbidden. No block is skipped merely because the fast path suggests that it is probably harmless.
+
+The prefilter is therefore not an approximate certificate. Its sole role is computational triage. It may reject blocks before multiprecision evaluation, but it may never authorize skipping by itself. Every realized skip is accompanied by an \mpfr{} proof record, and every numerical uncertainty results in retention. This asymmetry is essential. Ordinary floating-point arithmetic can be informative, but it is not enough to justify a mathematically certified omission.
+
+Compression-only and certified RACK-KV share the same reconstructed-attention arithmetic path. The only difference is whether the certified mode is allowed to mask a subset of reconstructed historical contributions after authorization. This separation is scientifically useful because it isolates two phenomena: compression error, which is present even when no block is skipped, and skipping error, which appears only when the certificate omits a reconstructed contribution.
+
+\subsection{Grouped-Query Attention Considerations}
+
+\begin{figure}[t]
+  \centering
+  \input{figures/fig_gqa_logical_vs_physical.tex}
+  \caption{Logical query-head skipping versus physical omission under grouped-query attention. Four query heads share one KV head. A logical skip for one query head does not imply that the shared physical block can be omitted; physical omission requires eligibility for every mapped query head or a stronger group-level certificate.}
+  \label{fig:gqa}
+\end{figure}
+
+Grouped-query attention introduces an additional layer of structure. In the evaluated model, \(H_q=32\) query heads share \(H_{kv}=8\) KV heads, so four query heads map to each physical KV head. The certificate currently reasons at the level of one query head and one block contribution. A successful proof therefore establishes a \emph{logical} skip: the contribution of that block may be omitted from one query head's reconstructed attention computation without violating the local bound.
+
+This is not yet a theorem about physical decode avoidance. The same KV-head block may still be required by another query head in the same group. Physical omission therefore requires an additional condition:
+\begin{equation}
+  \text{physical omission of a KV-head block}
+  \Longrightarrow
+  \text{every mapped query head can omit it,}
+\end{equation}
+or some other group-level certification rule strong enough to replace unanimity. The present work does not claim that such a rule has been established. It validates logical query-head skipping and the bookkeeping needed to audit those decisions, while leaving true GQA-group physical omission as future work.

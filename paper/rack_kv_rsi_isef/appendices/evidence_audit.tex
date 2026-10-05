@@ -1,0 +1,23 @@
+\section{Evidence and Claim Audit}
+\label{app:evidence}
+
+\begin{table}[h]
+  \centering
+  \small
+  \input{tables/appendix_claim_matrix.tex}
+  \caption{Compact claim-to-evidence summary. A more detailed machine-readable matrix appears in \artifactpath{evidence_matrix.csv}.}
+  \label{tab:claims}
+\end{table}
+
+The source package distinguishes five evidence states:
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Verified}: supported directly by inspected source code or local artifacts.
+  \item \textbf{Empirically observed}: measured in the evaluated cases but not elevated to a universal guarantee.
+  \item \textbf{Provisional}: safe wording used for corpus-bounded novelty or incomplete evidence.
+  \item \textbf{Planned}: an intended experiment or theorem, not a completed contribution.
+  \item \textbf{Unresolved}: intentionally left without a factual claim.
+\end{itemize}
+
+The file \artifactpath{missing_evidence.json} records any remaining evidence gaps and whether the verified two-prompt 32-layer quality package is included in the paper-support materials. The full bibliography is also forced into the compiled reference list here so that the manuscript remains self-contained.
+
+\nocite{tricco2018prisma,liu2024kivi,li2024snapkv,tang2024quest,zhang2023h2o,hao2026deltakv,zhu2025ojakv,liu2024clusterkv,yang2025attentionpredictor,ji2026echokv,feng2024adakv,wang2025commonkv,guo2024a2ats,magarshak2026pltries,salfati2026quantizationdominates,luo2026queryvisibility,haverbeck2026risk,chen2025pitfalls,kim2026polynomialcontext,kwon2023pagedattention,xiao2024infllm,deepseekai2024deepseekv2}

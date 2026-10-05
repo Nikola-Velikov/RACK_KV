@@ -1,0 +1,21 @@
+\begin{threeparttable}
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+\toprule
+Symbol & Meaning \\
+\midrule
+\(W\) & Exact recent-window length retained without compression \\
+\(B\) & Maximum historical block size \\
+\(q\) & Query vector for one attention head and one position \\
+\((k_i,v_i)\) & Original cached key and value vectors at visible position \(i\) \\
+\((\hat{k}_i,\hat{v}_i)\) & Reconstructed key and value vectors after compression \\
+\(a_m\) & Representative anchor for historical block \(m\) \\
+\(\rho_m\) & Upper bound on the key radius of block \(m\) \\
+\(\nu_m\) & Upper bound on the value norm of block \(m\) \\
+\(K,S\) & Kept and skipped entry sets for one query-head attention computation \\
+\(o_{\exact}\) & Attention output over the original uncompressed cache \\
+\(\hat{o}_{\full}\) & Attention output over the fully reconstructed compressed cache \\
+\(\hat{o}_{\kept}\) & Attention output after certified skipping on the reconstructed cache \\
+\(U_S,L_K\) & Upper bound on skipped softmax mass and lower bound on kept softmax mass \\
+\bottomrule
+\end{tabularx}
+\end{threeparttable}

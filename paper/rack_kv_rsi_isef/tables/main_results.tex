@@ -1,0 +1,20 @@
+\begin{threeparttable}
+\small
+\hfuzz=1pt
+\setlength{\tabcolsep}{3pt}
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}l c c c c c c c@{}}
+\toprule
+Method & Cfg. & {\makecell{Bytes\\(kB)}} & {\makecell{Mean\\L2}} & {\makecell{Median\\L2}} & {\makecell{P95\\L2}} & Ratio & {\makecell{Saving\\(\%)}} \\
+\midrule
+Full KV & N & 91.8 & 0 & 0 & 0 & 0.99 & -0.7 \\
+RACK-KV & N & 56.2 & $2.3 \times 10^{-3}$ & $8.3 \times 10^{-4}$ & $1.0 \times 10^{-2}$ & 1.58 & 36.5 \\
+Uniform INT8 & N & 51.3 & $6.5 \times 10^{-3}$ & $5.1 \times 10^{-3}$ & $1.8 \times 10^{-2}$ & 1.73 & 41.5 \\
+KIVI-style & N & 20.8 & $4.1 \times 10^{-1}$ & $3.0 \times 10^{-1}$ & $1.2$ & 4.13 & 73.1 \\
+SnapKV-style & M & 56.2 & $1.2 \times 10^{-2}$ & $6.0 \times 10^{-3}$ & $4.9 \times 10^{-2}$ & 1.58 & 36.4 \\
+Quest-style & M & 56.2 & $2.8 \times 10^{-2}$ & $1.6 \times 10^{-2}$ & $1.0 \times 10^{-1}$ & 1.59 & 36.9 \\
+\bottomrule
+\end{tabular*}
+\begin{tablenotes}[flushleft]
+\item N denotes the native configuration and M the matched-budget configuration. The negative saving for Full KV reflects small serialization overhead in the benchmark container rather than compression failure.
+\end{tablenotes}
+\end{threeparttable}

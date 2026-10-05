@@ -1,0 +1,14 @@
+\section{Layer-0 Safety-Validation Notes}
+\label{app:perhead}
+
+The paper uses one additional artifact to validate all-head execution and certificate bookkeeping without presenting it as a full-model benchmark. That artifact executes only layer \(0\), then applies the final RMSNorm and language-model head. Its logits, negative log-likelihood, and perplexity are therefore diagnostic pseudo-logit quantities rather than full \modeldisplay{} quality measurements.
+
+\begin{table}[h]
+  \centering
+  \small
+  \input{tables/appendix_layer0_safety.tex}
+  \caption{Corrected layer-0 safety-validation summary. These numbers support memory, bookkeeping, and logical-skip claims only.}
+  \label{tab:layerzero}
+\end{table}
+
+This artifact is valuable for three narrower questions: whether all 32 query heads and all 8 KV heads are exercised correctly, whether the repaired sequential execution remains memory-safe, and whether the storage-accounting categories remain disjoint. It is not used as evidence for full-model language quality.

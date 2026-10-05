@@ -1,0 +1,15 @@
+\begin{threeparttable}
+\begin{tabularx}{\linewidth}{@{}lXcccc@{}}
+\toprule
+Method & Core idea & Removes history & Query-aware & Bound & Status here \\
+\midrule
+Full KV & Exact cache & No & No & Exact & Reference \\
+Uniform INT8 & Uniform KV quantization & No & No & None & Baseline \\
+KIVI & Asymmetric low-bit quantization & No & No & None & KIVI-style \\
+SnapKV & Window-based token selection & Yes & Yes & None & SnapKV-style \\
+Quest & Query-aware page retrieval & Yes & Yes & None & Quest-style \\
+DeltaKV & Residual-style compression & No & No & None & Literature \\
+RACK-KV & Block-local compression plus certificate & Optional & Yes & Local & Method \\
+\bottomrule
+\end{tabularx}
+\end{threeparttable}

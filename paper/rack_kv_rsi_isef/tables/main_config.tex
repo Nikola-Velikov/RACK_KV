@@ -1,0 +1,20 @@
+\begin{threeparttable}
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+\toprule
+Item & Setting \\
+\midrule
+Model family & Fixed \modeldisplay{} checkpoint \\
+Attention structure & 32 query heads, 8 KV heads, GQA ratio 4:1, head dimension 128 \\
+Representative layers & 0, 8, 16, 24, 31 \\
+Representative-layer cases & 330 cases from 22 query positions and 3 query heads \\
+Full-model quality scope & Two 128-token prompt categories with 192 scored next-token predictions under teacher forcing \\
+RACK-KV configuration & Recent window \(W=16\), block size \(B=8\), tolerance \(0.05\) \\
+Compression path & Block-local anchor/residual coding with independently serialized blocks \\
+Modified full-model layers & 0, 8, 16, 24, 31 with all 32 query heads and all 8 KV heads \\
+Skip authorization & Directed-rounding multiprecision arithmetic at 256-bit precision \\
+Baselines & Full KV, Uniform INT8, KIVI-style, SnapKV-style, Quest-style \\
+Primary metrics & Serialized bytes, compression ratio, attention-output error, NLL, perplexity, token agreement, certificate statistics \\
+Supporting diagnostics & Longer layer-0 pilot and all-head layer-0 safety validation \\
+\bottomrule
+\end{tabularx}
+\end{threeparttable}

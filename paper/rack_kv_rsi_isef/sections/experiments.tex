@@ -1,0 +1,21 @@
+\section{Experimental Setup}
+
+The empirical study uses a fixed \modeldisplay{} checkpoint traced on CPU. Queries are taken after rotary position encoding, keys after rotary position encoding and cache update, and values after cache update. The experiments are designed to answer four scientific questions: whether the serializer really supports independent block decoding, how much storage the historical codec saves at a given reconstruction error, whether the skip certificate is empirically safe, and how local approximation behaves once it is propagated through the full Transformer.
+
+\begin{table}[t]
+  \centering
+  \small
+  \input{tables/main_config.tex}
+  \caption{Primary experimental configuration reported in the main paper. Exact revision identifiers, software versions, and build details are kept in the reproducibility materials rather than the main narrative.}
+  \label{tab:config}
+\end{table}
+
+The first benchmark focuses on representative layers \(0\), \(8\), \(16\), \(24\), and \(31\). For each layer, it evaluates \num{22} query positions and three selected query heads, giving \num{330} representative-layer cases. This evaluation is not a claim that only those heads matter. It is a controlled local benchmark built from real captured KV states, intended to compare storage and reconstructed attention behavior across methods at a fixed layer and query.
+
+The second benchmark is a verified full 32-layer teacher-forced evaluation on two deterministic 128-token prompt categories: one natural-language continuation prompt and one passkey-retrieval prompt. The modified RACK-KV and Uniform INT8 paths are applied only at representative layers \(0\), \(8\), \(16\), \(24\), and \(31\); all remaining layers use exact full-cache attention. At each modified layer, the implementation processes all \(32\) query heads and all \(8\) KV heads with the correct GQA mapping, and each method stream is propagated independently through the remainder of the model. Scoring begins at position \(31\), so each prompt contributes \num{96} scored next-token predictions and the aggregate full-model evaluation contains \num{192} scored positions.
+
+The reported RACK-KV setting uses an exact recent window of \(W=16\), historical block size \(B=8\), and a local certified-skip tolerance of \(0.05\). Compression-only and certified RACK-KV share the same codec, serializer, and reconstructed-attention arithmetic; they differ only in whether certified masking is permitted. The baselines represent distinct alternatives within the long-context design space: \methodfull{} as the exact reference, \methodint{} as a transparent whole-cache quantization control, \methodkivi{} as a very aggressive low-bit approximation, and SnapKV-style and Quest-style methods as query-dependent selection baselines. When the baseline design permits tuning, matched-budget comparisons target the serialized byte count of RACK-KV as closely as possible.
+
+In addition to these two main evaluations, the evidence base includes a longer single-configuration layer-0 pilot and a one-layer all-head safety validation that checks memory-safe sequential execution, certificate bookkeeping, and disjoint byte accounting. Those auxiliary experiments support the method and implementation claims in this paper, but they are not substitutes for broader prompt coverage or a production inference benchmark.
+
+All skip decisions are evaluated with directed-rounding multiprecision arithmetic at 256-bit precision. The \fp{} prefilter may reject a candidate early, but it cannot authorize a skip. Storage accounting is reported with disjoint byte categories so that serialized totals are not inflated by double counting metadata. The full-model evaluation uses only two short deterministic prompt categories and teacher forcing; it should therefore be interpreted as a narrow quality-preservation test rather than a comprehensive language-model benchmark.

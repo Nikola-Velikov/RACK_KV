@@ -1,0 +1,19 @@
+\begin{threeparttable}
+\begin{tabular}{@{}l
+S[table-format=2.1]
+S[table-format=2.1]
+S[table-format=1.2]
+S[table-format=1.2]
+S[table-format=1.2]
+S[table-format=2.1]@{}}
+\toprule
+Method & {Keys (kB)} & {Values (kB)} & {Scales} & {Meta + index} & {Recent} & {Total (kB)} \\
+\midrule
+RACK-KV & 23.4 & 23.4 & 0.08 & 1.12 & 8.19 & 56.2 \\
+Uniform INT8 & 20.8 & 20.8 & 0.65 & 0.88 & 8.19 & 51.3 \\
+SnapKV-style (matched) & 23.5 & 23.5 & 0.00 & 1.03 & 8.19 & 56.2 \\
+Quest-style (matched) & 23.5 & 23.5 & 0.00 & 1.02 & 8.19 & 56.2 \\
+KIVI-style & 5.2 & 5.2 & 1.16 & 1.06 & 8.19 & 20.8 \\
+\bottomrule
+\end{tabular}
+\end{threeparttable}

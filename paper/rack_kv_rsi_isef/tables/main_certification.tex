@@ -1,0 +1,18 @@
+\begin{threeparttable}
+\begin{tabularx}{\linewidth}{@{}l c X@{}}
+\toprule
+Quantity & Result & Interpretation \\
+\midrule
+Evaluated block decisions & \num{6750} & Total candidate decisions examined in the representative-layer benchmark \\
+Certified skips & \num{14} & Few blocks satisfied the current local bound \\
+Weighted skip fraction & \num{0.21}\% & Safe but sparse certified skipping \\
+Cases with any skip & \num{14}/\num{330} & Skips were concentrated in a small subset of cases \\
+Rigorous violations & \num{0} & No skipped case exceeded its rigorous bound \\
+False-safe cases & \num{0} & No block was skipped without empirical safety in the evaluated data \\
+Numerical fallbacks & \num{0} & The multiprecision path did not require unresolved fallback handling \\
+Largest observed skip error & \num{3.26e-2} & Maximum empirical deviation among skipped cases \\
+Largest certificate bound & \num{4.36e-2} & Conservative upper bound remained above the observed maximum \\
+Largest per-case skip fraction & \num{3.3}\% & Even the most aggressive skipped case remained modest \\
+\bottomrule
+\end{tabularx}
+\end{threeparttable}

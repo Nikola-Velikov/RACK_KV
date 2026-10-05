@@ -1,0 +1,30 @@
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{2pt}
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{1.58cm}>{\raggedright\arraybackslash}p{1.65cm}>{\raggedright\arraybackslash}p{0.82cm}>{\raggedright\arraybackslash}p{0.92cm}>{\raggedright\arraybackslash}p{0.88cm}>{\raggedright\arraybackslash}p{1.0cm}>{\raggedright\arraybackslash}p{3.08cm}@{}}
+\caption{Extended comparator taxonomy used to frame the project.}\label{tab:taxonomy}\\
+\toprule
+Method & Mech. & Q? & Access & Bound & Stat. & Caveat \\
+\midrule
+\endfirsthead
+\toprule
+Method & Mech. & Q? & Access & Bound & Stat. & Caveat \\
+\midrule
+\endhead
+Full KV & Exact cache & No & Exact & Exact & Proj. & No compression or skipping \\
+INT8 & Uniform quantization & No & Yes & No & Proj. & Keeps all entries \\
+KIVI & Asymmetric low-bit quantization & No & Yes & No & KIVI-st. & Project approximation \\
+SnapKV & Window-based token selection & Yes & Ltd. & No & Snap-st. & Discards positions \\
+Quest & Query-aware page retrieval & Yes & Page-level & No & Quest-st. & Discrete budget match \\
+H2O & Heavy-hitter eviction & Yes & Ltd. & No & Lit. & Eviction-focused \\
+Ada-KV & Adaptive budget allocation & Yes & Ltd. & No & Lit. & No local certificate \\
+DeltaKV & Residual-style compression & No & Ltd. & No & Lit. & Compression overlap \\
+OjaKV & Online low-rank compression & No & Ltd. & No & Lit. & Different approximation family \\
+ClusterKV & Semantic clustering & Yes & Ltd. & No & Lit. & Retrieval by clustering \\
+EchoKV & Similarity reconstruction & No & Ltd. & No & Lit. & No skip theorem \\
+PL tries & Predictive coding & Impl. & No & No & Lit. & Poor random access \\
+PagedAttn. & Paging and serving & No & Yes & No & Lit. & Systems-only \\
+RACK-KV & Block-local compression plus certificate & Yes & Yes & Yes & Proj. & Local theorem only \\
+\bottomrule
+\end{longtable}
+\end{center}

@@ -1,0 +1,26 @@
+\subsection{Independently Decodable Storage}
+
+\begin{figure}[t]
+  \centering
+  \input{figures/fig_block_format.tex}
+  \caption{Independent random access in the serialized historical cache. The container stores a short global header, an index of block offsets, and self-contained block payloads. Decoding block \(j\) requires only its own payload together with fixed schema constants.}
+  \label{fig:blockformat}
+\end{figure}
+
+\begin{definition}[Independently decodable block]
+  A historical block is independently decodable if reconstructing its keys and values requires only its own serialized payload, the global container schema, and its own local metadata.
+\end{definition}
+
+This definition rules out cross-block delta chains, hidden mutable decoder state, and any requirement to scan from the beginning of the context to the requested block. In particular, it excludes the common sequential pattern in which block \(B_m\) can be reconstructed only after reconstructing \(B_{m-1}\). Under RACK-KV, the dependency depth of one addressed block is therefore \(O(1)\) in the number of historical blocks, whereas a strict delta chain has dependency depth \(O(M)\).
+
+The implementation enforces this contract through an explicit container format. A top-level header stores version information and the number of historical blocks. An index records the byte offset and length of each block payload. Every payload then stores all information needed for local reconstruction: block start, block length, key anchor, value anchor, key scale, value scale, geometric metadata, and the quantized residual arrays. Query-aware retrieval and certified skipping are only practical if this storage contract holds, so the serializer is part of the scientific method rather than a purely engineering detail.
+
+\subsection{Geometric Block Summaries}
+
+Each block carries two outward-safe geometric summaries. The first is a key radius \(\rho_m\) such that every reconstructed key vector assigned to block \(m\) lies within distance \(\rho_m\) of the representative anchor \(a_m\). The second is a value norm bound \(\nu_m\) such that every reconstructed value vector in the block satisfies
+\begin{equation}
+  \norm{\hat{v}_{m,t}} \le \nu_m.
+\end{equation}
+These summaries are deliberately small. They do not try to encode the full internal structure of the block; instead, they capture just enough information to support a conservative query-dependent certificate. Intuitively, \(\rho_m\) says how far any reconstructed key in the block can move away from the representative, while \(\nu_m\) bounds the size of any omitted value vector if the block is skipped.
+
+The price of that compactness is looseness. A single norm ball discards directional structure, correlations among coordinates, and cancellation among values. It is therefore safe but pessimistic. RACK-KV accepts this tradeoff because the primary role of the metadata is not perfect geometric description; it is to produce a sound upper bound that is cheap to store, cheap to load, and compatible with independent block decoding.

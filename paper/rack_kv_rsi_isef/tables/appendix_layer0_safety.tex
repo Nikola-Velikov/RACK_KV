@@ -1,0 +1,21 @@
+\begin{threeparttable}
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+\toprule
+Field & Value \\
+\midrule
+Experiment scope & Layer-0 memory and correctness safety validation only \\
+Executed layers & Layer 0; layers 1 through 31 were not executed \\
+Head coverage & All 32 query heads and all 8 KV heads under the model's GQA mapping \\
+Numerical interpretation & Diagnostic pseudo-logits only; not full-model quality \\
+Certificate records & \num{3584} \\
+Eligible query-head/block decisions & \num{26880} \\
+Candidates sent to \mpfr{} & \num{4} \\
+Certified logical skip decisions & \num{4} \\
+Unique tokens with any skip & \num{1} \\
+Unique logical KV-head/block combinations & \num{3} \\
+GQA physical block omissions & \num{0} \\
+Physical decodes actually avoided & \num{0} \\
+Maximum peak RSS from actual computation runs & Approximately \num{1.44}~GB \\
+\bottomrule
+\end{tabularx}
+\end{threeparttable}

@@ -1,0 +1,20 @@
+\section{Broader Implications and Future Work}
+
+The clearest next theoretical targets are a one-layer compression-plus-skipping theorem and a propagation theorem for the full Transformer. A useful Theorem 2A would bound
+\begin{equation}
+  \norm{o_\exact - \hat{o}_\kept}
+\end{equation}
+in terms of key reconstruction error, value reconstruction error, query norm, softmax sensitivity, and the local skipping term from \cref{thm:local}. A stronger Theorem 2B would propagate local approximation error through multi-head composition, GQA, output projection, residual additions, RMSNorm, MLPs, downstream layers, and the final LM head.
+
+The main systems question is physicality. The present implementation certifies logical query-head skips, but a practical inference engine needs to decide whether an entire shared KV-head block can be omitted before reconstruction. That likely requires either a group-level certificate or an equivalent GQA-aware aggregation rule.
+
+Additional future work includes:
+\begin{enumerate}[label=\arabic*.]
+  \item tighter block geometry such as multiple representatives or directional bounds;
+  \item physical random-access decode avoidance in a live generation loop;
+  \item GPU kernels and bandwidth-aware implementations;
+  \item a second-model validation campaign;
+  \item a completed full-transformer teacher-forced quality benchmark over multiple prompts.
+\end{enumerate}
+
+The broader implication is methodological. If compression, random access, and certification can be co-designed successfully, long-context serving may eventually avoid the current trade-off between memory reduction and hard-to-audit heuristic information loss. That implication remains prospective until the full-model and physical-systems evidence is complete.

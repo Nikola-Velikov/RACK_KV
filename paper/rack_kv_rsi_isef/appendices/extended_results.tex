@@ -1,0 +1,55 @@
+\section{Additional Experimental Tables and Plots}
+\label{app:extended}
+
+\subsection{Extended comparator taxonomy}
+
+\input{tables/appendix_taxonomy.tex}
+
+\subsection{Longer-prompt layer-0 pilot}
+
+The longer supporting pilot fixes \(W=16\) and \(B=8\) and varies only the skip tolerance. Its purpose is modest: to test the chosen configuration on a 256-token layer-0 trace, not to claim a complete hyperparameter sweep.
+
+\begin{table}[h]
+  \centering
+  \small
+  \input{tables/appendix_pilot_tolerance.tex}
+  \caption{Supporting 256-token layer-0 pilot across four tolerances. Certified skips appear only at nonzero tolerances, and the skip fraction remains small.}
+  \label{tab:pilot}
+\end{table}
+
+\begin{figure}[h]
+  \centering
+  \input{figures/fig_skip_vs_tolerance.tex}
+  \caption{Weighted certified skip fraction versus tolerance in the supporting 256-token layer-0 pilot. The curve rises immediately from zero and then plateaus because the same three blocks are certified at all nonzero tolerances tested.}
+  \label{fig:skipvstol}
+\end{figure}
+
+\subsection{Serialized-byte structure}
+
+\begin{table}[h]
+  \centering
+  \small
+  \input{tables/appendix_storage_breakdown.tex}
+  \caption{Mean serialized-byte breakdown in the representative-layer benchmark. Metadata overhead explains why RACK-KV uses slightly more bytes than uniform INT8 even though its reconstruction error is lower.}
+  \label{tab:storagebreakdown}
+\end{table}
+
+\begin{figure}[h]
+  \centering
+  \input{figures/fig_storage_breakdown.tex}
+  \caption{Stacked byte categories for representative-layer methods. RACK-KV spends bytes on anchors, scales, and indexing to preserve independent random access.}
+  \label{fig:storagebreakdown}
+\end{figure}
+
+\subsection{Position dependence}
+
+\begin{figure}[h]
+  \centering
+  \input{figures/fig_error_vs_position.tex}
+  \caption{Mean RACK-KV local attention-output error versus query position in the representative-layer benchmark. The error is not monotone in position, although the serialized cache size increases steadily with the visible prefix.}
+  \label{fig:errorposition}
+\end{figure}
+
+\subsection{Verified full-model status}
+
+As of Sunday, July 26, 2026, the local evidence shows that a full 32-layer teacher-forced evaluation framework exists, but a verified final package for the full-model run is not yet complete. Accordingly, the paper reports no final-model quality numbers.

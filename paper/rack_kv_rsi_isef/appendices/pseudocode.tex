@@ -1,0 +1,84 @@
+\section{Pseudocode and Implementation Details}
+\label{app:pseudocode}
+
+\begin{algorithm}[h]
+\caption{Block-local encoding}
+\begin{algorithmic}[1]
+\Require historical KV block $(K,V)$ of length $n_m$, block scales chosen from the implementation rule
+\State $a_K \gets K_0$, $a_V \gets V_0$
+\For{$t=1$ to $n_m-1$}
+  \State $r^K_t \gets K_t - a_K$
+  \State $r^V_t \gets V_t - a_V$
+  \State $q^K_t \gets \operatorname{clip}(\operatorname{round}(r^K_t / s^K_m), -127, 127)$
+  \State $q^V_t \gets \operatorname{clip}(\operatorname{round}(r^V_t / s^V_m), -127, 127)$
+\EndFor
+\State Compute outward-safe $\rho_m$ and $\nu_m$
+\State Serialize metadata, anchors, scales, and residual bytes
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[h]
+\caption{Independent block decoding}
+\begin{algorithmic}[1]
+\Require one serialized block payload and schema constants
+\State Read block start, length, anchors, scales, and metadata
+\For{$t=1$ to $n_m-1$}
+  \State $\hat{K}_t \gets a_K + s^K_m q^K_t$
+  \State $\hat{V}_t \gets a_V + s^V_m q^V_t$
+\EndFor
+\State \Return reconstructed block only
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[h]
+\caption{Query-dependent candidate prefilter}
+\begin{algorithmic}[1]
+\Require query $q$, reconstructed block metadata, tolerance $\varepsilon$
+\For{historical block $m$}
+  \State Compute a cheap conservative \fp{} upper bound proxy
+  \If{proxy is clearly above tolerance}
+    \State keep block
+  \Else
+    \State send block to rigorous \mpfr{} certification
+  \EndIf
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[h]
+\caption{Rigorous MPFR skip certification}
+\begin{algorithmic}[1]
+\Require query $q$, kept set statistics, candidate block metadata, precision $p$
+\State Compute outward-rounded block logit cap(s)
+\State Accumulate $U_S$, lower-bound $L_K$, and upper-bound $\nu_S$, $B_K$
+\State Evaluate the theorem bound with directed rounding
+\If{rigorous upper bound $\le \varepsilon$}
+  \State authorize logical skip and store proof record
+\Else
+  \State keep block
+\EndIf
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[h]
+\caption{RACK-KV reconstructed attention}
+\begin{algorithmic}[1]
+\Require recent exact KV, reloaded serialized historical blocks, logical skip mask
+\State Reconstruct every retained historical block from the serialized container
+\State Concatenate exact recent entries and retained reconstructed historical entries
+\State Compute attention with the shared approximate arithmetic path
+\State \Return output and compact scalar metrics
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[h]
+\caption{Future GQA-aware physical-block eligibility (not yet implemented)}
+\begin{algorithmic}[1]
+\Require one KV-head block shared by multiple mapped query heads
+\If{every mapped query head can rigorously skip the same physical block}
+  \State mark the physical block eligible for omission before reconstruction
+\Else
+  \State reconstruct the physical block
+\EndIf
+\end{algorithmic}
+\end{algorithm}
